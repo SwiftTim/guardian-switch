@@ -4,7 +4,9 @@ import { and, eq, lte, sql, isNull, or } from 'drizzle-orm';
 import { Resend } from 'resend';
 import { NextRequest, NextResponse } from 'next/server';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const dynamic = "force-dynamic";
+
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key');
 
 export async function GET(req: NextRequest) {
     // Simple auth for cron - skip for local dev or use a secret header

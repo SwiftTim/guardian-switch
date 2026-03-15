@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+export const dynamic = "force-dynamic";
 import { users, monitors } from "@/lib/db/schema";
 import { login } from "@/lib/auth";
 import bcrypt from "bcryptjs";

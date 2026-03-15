@@ -5,7 +5,7 @@ import { Card, Button, Badge, cn } from '@/components/ui/core';
 import { Shield, Clock, Mail, History, Terminal, AlertTriangle, Cpu, LogOut } from 'lucide-react';
 import { getSession, logout } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { ApiKeyCard } from '@/components/dashboard-client';
+import { ApiKeyCard, MonitorSettingsForm, InstructionPanel } from '@/components/dashboard-client';
 
 export const dynamic = "force-dynamic";
 
