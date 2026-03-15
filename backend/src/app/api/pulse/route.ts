@@ -35,8 +35,12 @@ export async function POST(req: NextRequest) {
             .where(eq(monitors.userId, user.id));
 
         return NextResponse.json({ message: 'Pulse received' });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Pulse error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({
+            error: 'Internal server error',
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 });
     }
 }
