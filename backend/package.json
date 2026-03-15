@@ -12,7 +12,7 @@
     "@neondatabase/serverless": "^1.0.2",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
-    "drizzle-orm": "^0.33.0",
+    "drizzle-orm": "^0.45.1",
     "jose": "^6.2.1",
     "lucide-react": "^0.577.0",
     "next": "^15.1.0",
