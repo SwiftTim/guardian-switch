@@ -1,11 +1,11 @@
-import { pgTable, text, timestamp, uuid, integer, boolean, serial, pgIndex } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid, integer, boolean, serial, index } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const users = pgTable('users', {
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: uuid('id').primaryKey().default(sql`uuid_generate_v4()`),
     email: text('email').unique().notNull(),
     passwordHash: text('password_hash').notNull(),
-    apiKey: uuid('api_key').defaultRandom().unique(),
+    apiKey: uuid('api_key').default(sql`uuid_generate_v4()`).unique(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 
@@ -27,5 +27,5 @@ export const monitors = pgTable('monitors', {
     isActive: boolean('is_active').default(true),
     lastPulseAt: timestamp('last_pulse_at', { withTimezone: true }),
 }, (table) => ({
-    idxMonitorsLastPulse: pgIndex('idx_monitors_last_pulse').on(table.lastPulseAt),
+    idxMonitorsLastPulse: index('idx_monitors_last_pulse').on(table.lastPulseAt),
 }));
