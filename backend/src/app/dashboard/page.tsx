@@ -1,8 +1,11 @@
 import { db } from '@/lib/db';
-import { monitors, pulses } from '@/lib/db/schema';
+import { monitors, pulses, users } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { Card, Button, Badge, cn } from '@/components/ui/core';
-import { Shield, Clock, Mail, History, Terminal, AlertTriangle, Cpu } from 'lucide-react';
+import { Shield, Clock, Mail, History, Terminal, AlertTriangle, Cpu, LogOut } from 'lucide-react';
+import { getSession, logout } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { ApiKeyCard } from '@/components/dashboard-client';
 
 export const dynamic = "force-dynamic";
 
@@ -17,30 +20,30 @@ async function getDashboardData(userId: string) {
         orderBy: [desc(pulses.timestamp)],
     });
 
-    return { monitor, recentPulses };
+    const user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+    });
+
+    return { monitor, recentPulses, user };
 }
 
 export default async function DashboardPage() {
-    let USER_ID = "00000000-0000-0000-0000-000000000000";
+    const session = await getSession();
+
+    if (!session) {
+        redirect('/login');
+    }
+
+    const userId = session.id;
 
     let data;
     try {
-        // First try the default ID
-        data = await getDashboardData(USER_ID);
-
-        // If no monitor found, try to get the first user in the system for demo/setup
-        if (!data.monitor) {
-            const firstUser = await db.query.users.findFirst();
-            if (firstUser) {
-                USER_ID = firstUser.id;
-                data = await getDashboardData(USER_ID);
-            }
-        }
+        data = await getDashboardData(userId);
     } catch (e) {
-        data = { monitor: null, recentPulses: [] };
+        data = { monitor: null, recentPulses: [], user: null };
     }
 
-    const { monitor, recentPulses } = data;
+    const { monitor, recentPulses, user } = data;
     const isHealthy = monitor?.lastPulseAt &&
         (new Date().getTime() - new Date(monitor.lastPulseAt).getTime()) < (monitor.thresholdHours || 24) * 3600000;
 
@@ -51,18 +54,29 @@ export default async function DashboardPage() {
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <Cpu className="w-5 h-5 text-primary" />
-                            <span className="text-xs font-mono font-bold tracking-widest uppercase text-primary">System v1.0</span>
+                            <span className="text-xs font-mono font-bold tracking-widest uppercase text-primary">System Auth Active</span>
                         </div>
                         <h1 className="text-4xl font-bold tracking-tighter text-foreground font-mono glow-text">
                             GUARDIAN_DASHBOARD
                         </h1>
-                        <p className="text-foreground/60 text-sm">Active monitoring for node-01 sentinel</p>
+                        <p className="text-foreground/60 text-sm">Authenticated as: <span className="text-primary font-mono">{user?.email || "UNKNOWN"}</span></p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" className="font-mono">SYS_LOGS</Button>
+                        <form action={async () => {
+                            'use server';
+                            await logout();
+                            redirect('/login');
+                        }}>
+                            <Button type="submit" variant="outline" className="font-mono gap-2">
+                                <LogOut className="w-4 h-4" /> SIGN_EXTRACT
+                            </Button>
+                        </form>
                         <Button variant="secondary" className="font-mono">SETTINGS</Button>
                     </div>
                 </header>
+
+                {/* API Key Banner */}
+                <ApiKeyCard apiKey={user?.apiKey || ""} />
 
                 <div className="grid gap-6 md:grid-cols-12">
                     {/* Status Card */}
