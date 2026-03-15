@@ -4,6 +4,8 @@ import { eq, desc } from 'drizzle-orm';
 import { Card, Button, Badge, cn } from '@/components/ui/core';
 import { Shield, Clock, Mail, History, Terminal, AlertTriangle, Cpu } from 'lucide-react';
 
+export const dynamic = "force-dynamic";
+
 async function getDashboardData(userId: string) {
     const monitor = await db.query.monitors.findFirst({
         where: eq(monitors.userId, userId),

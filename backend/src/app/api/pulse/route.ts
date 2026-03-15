@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { pulses, users, monitors } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -26,15 +26,15 @@ export async function POST(req: NextRequest) {
             userId: user.id,
             deviceName: device?.name || 'Unknown',
             deviceOs: device?.os || 'Unknown',
-            timestamp: new Date(),
+            timestamp: sql`now()`,
         });
 
         // Update the monitor's last pulse timestamp
         await db.update(monitors)
-            .set({ lastPulseAt: new Date() })
+            .set({ lastPulseAt: sql`now()` })
             .where(eq(monitors.userId, user.id));
 
-        return NextResponse.json({ message: 'Pulse received' });
+        return NextResponse.json({ message: 'Pulse received', status: 'OK' });
     } catch (error: any) {
         console.error('Pulse error:', error);
         return NextResponse.json({
