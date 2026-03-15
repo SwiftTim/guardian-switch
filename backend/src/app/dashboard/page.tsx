@@ -91,7 +91,7 @@ export default async function DashboardPage() {
                                     <Shield className={cn("w-6 h-6", isHealthy ? "text-cta" : "text-amber-500")} />
                                     SYSTEM_STATUS
                                 </h3>
-                                <p className="mt-2 text-foreground/70 max-w-md">
+                                <p className="mt-2 text-foreground/70 max-w-md text-sm leading-relaxed">
                                     {isHealthy
                                         ? "Sentinel check-in successful. No anomalies detected in current cycle."
                                         : "CRITICAL: Response timeout exceeded. Sentinel failed to report."}
@@ -120,36 +120,13 @@ export default async function DashboardPage() {
                         </div>
                     </Card>
 
-                    {/* Configuration Summary */}
-                    <Card className="md:col-span-4 border-primary/20 bg-primary/5">
-                        <h3 className="text-lg font-bold font-mono flex items-center gap-2 mb-6 tracking-tight">
-                            <Terminal className="w-5 h-5 text-primary" />
-                            SW_CONFIG
-                        </h3>
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-4 group">
-                                <div className="p-2 rounded-lg bg-background border border-foreground/10 group-hover:border-primary/50 transition-colors">
-                                    <Clock className="w-5 h-5 text-primary" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold uppercase text-foreground/40 font-mono">THRESHOLD</p>
-                                    <p className="text-sm font-medium">{monitor?.thresholdHours || 24}H Interval</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4 group">
-                                <div className="p-2 rounded-lg bg-background border border-foreground/10 group-hover:border-primary/50 transition-colors">
-                                    <Mail className="w-5 h-5 text-primary" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold uppercase text-foreground/40 font-mono">ESC_CONTACT</p>
-                                    <p className="text-sm font-medium truncate max-w-[180px]">{monitor?.trustedEmail || "NOT_SET"}</p>
-                                </div>
-                            </div>
-                            <div className="pt-2">
-                                <Button className="w-full font-mono text-xs tracking-widest" variant="outline">UPDATE_CONFIG</Button>
-                            </div>
-                        </div>
-                    </Card>
+                    {/* Configuration Summary - Now a Form */}
+                    <div className="md:col-span-4 rounded-3xl overflow-hidden">
+                        <MonitorSettingsForm initialData={monitor} />
+                    </div>
+
+                    {/* Deployment Guide */}
+                    <InstructionPanel apiKey={user?.apiKey || ""} />
 
                     {/* Activity Log */}
                     <Card className="md:col-span-12">
@@ -159,17 +136,17 @@ export default async function DashboardPage() {
                                 PULSE_HISTORY
                             </h3>
                             <div className="h-px flex-1 mx-6 bg-foreground/10" />
-                            <span className="text-[10px] font-mono font-bold text-foreground/40">TOTAL_RECORDS: {recentPulses.length}</span>
+                            <span className="text-[10px] font-mono font-bold text-foreground/40 uppercase tracking-widest">BUFFER_STREAMS: {recentPulses.length}</span>
                         </div>
 
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead>
                                     <tr className="border-b border-foreground/10 font-mono text-[10px] uppercase tracking-widest text-foreground/40">
-                                        <th className="px-4 py-4 font-bold">DEVICE_ID</th>
-                                        <th className="px-4 py-4 font-bold">ENV_OS</th>
-                                        <th className="px-4 py-4 font-bold">TIMESTAMP_LOCAL</th>
-                                        <th className="px-4 py-4 font-bold text-right">STATUS</th>
+                                        <th className="px-4 py-4 font-bold">NODE_ID</th>
+                                        <th className="px-4 py-4 font-bold">OS_FAMILY</th>
+                                        <th className="px-4 py-4 font-bold">STAMP_UTC</th>
+                                        <th className="px-4 py-4 font-bold text-right">RESPONSE</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-foreground/5 font-mono text-sm">
@@ -177,22 +154,22 @@ export default async function DashboardPage() {
                                         recentPulses.map((pulse: any) => (
                                             <tr key={pulse.id} className="group hover:bg-foreground/[0.02] transition-colors">
                                                 <td className="px-4 py-4 font-medium flex items-center gap-2">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-cta group-hover:scale-125 transition-transform" />
                                                     {pulse.deviceName}
                                                 </td>
                                                 <td className="px-4 py-4 text-foreground/60">{pulse.deviceOs}</td>
                                                 <td className="px-4 py-4 text-foreground/60">{new Date(pulse.timestamp).toLocaleString()}</td>
                                                 <td className="px-4 py-4 text-right">
                                                     <span className="inline-flex items-center text-[10px] font-bold text-cta">
-                                                        [ SUCCESS ]
+                                                        [ RECEIVED ]
                                                     </span>
                                                 </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={4} className="px-4 py-16 text-center text-foreground/40 italic font-mono">
-                                                NO_RECORDS_FOUND_IN_BUFFER
+                                            <td colSpan={4} className="px-4 py-16 text-center text-foreground/20 italic font-mono selection:bg-transparent uppercase tracking-wider text-xs">
+                                                NO_ACTIVE_STREAMS_DETECTED
                                             </td>
                                         </tr>
                                     )}
