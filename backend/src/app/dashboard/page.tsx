@@ -19,11 +19,21 @@ async function getDashboardData(userId: string) {
 }
 
 export default async function DashboardPage() {
-    const USER_ID = "00000000-0000-0000-0000-000000000000";
+    let USER_ID = "00000000-0000-0000-0000-000000000000";
 
     let data;
     try {
+        // First try the default ID
         data = await getDashboardData(USER_ID);
+
+        // If no monitor found, try to get the first user in the system for demo/setup
+        if (!data.monitor) {
+            const firstUser = await db.query.users.findFirst();
+            if (firstUser) {
+                USER_ID = firstUser.id;
+                data = await getDashboardData(USER_ID);
+            }
+        }
     } catch (e) {
         data = { monitor: null, recentPulses: [] };
     }
