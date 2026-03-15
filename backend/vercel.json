@@ -2,7 +2,7 @@
     "crons": [
         {
             "path": "/api/cron/check-monitors",
-            "schedule": "0 * * * *"
+            "schedule": "0 0 * * *"
         }
     ]
 }
