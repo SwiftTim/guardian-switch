@@ -140,8 +140,11 @@ export function InstructionPanel({ apiKey }: { apiKey: string }) {
     const [os, setOs] = useState<"linux" | "windows">("linux");
     const [copied, setCopied] = useState(false);
 
-    const linuxCmd = `curl -sSL https://guardian-switch.vercel.app/api/install | bash -s -- ${apiKey}`;
-    const windowsCmd = `iwr https://guardian-switch.vercel.app/api/install/win -useb | iex; install-sentinel -key "${apiKey}"`;
+    // Use dynamic origin to handle custom domains
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://guardian-switch.vercel.app";
+
+    const linuxCmd = `curl -sSL ${origin}/api/install | bash -s -- ${apiKey}`;
+    const windowsCmd = `iwr ${origin}/api/install/win -useb | iex; install-sentinel -key "${apiKey}"`;
 
     const copyCmd = () => {
         navigator.clipboard.writeText(os === "linux" ? linuxCmd : windowsCmd);

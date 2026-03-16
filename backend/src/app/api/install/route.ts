@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
-    const apiKey = req.nextUrl.searchParams.get('key') || '$1'; // $1 is from the bash piping
+    const apiKey = req.nextUrl.searchParams.get('key') || '$1';
+    const host = req.headers.get('host') || 'guardian-switch-jf1r.vercel.app';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    const baseUrl = `${protocol}://${host}`;
 
     const script = `#!/bin/bash
 
@@ -20,7 +23,6 @@ fi
 
 echo "🔧 Setting up GuardianSwitch Sentinel..."
 
-# Fix variables
 SENTINEL_DIR="$HOME/.guardian-switch"
 mkdir -p "$SENTINEL_DIR"
 
@@ -28,12 +30,12 @@ mkdir -p "$SENTINEL_DIR"
 cat <<EOF > "$HOME/.guardian_switch.json"
 {
   "api_key": "$API_KEY",
-  "url": "https://guardian-switch.vercel.app/api/pulse"
+  "url": "${baseUrl}/api/pulse"
 }
 EOF
 
-# Download sentinel script if it doesn't exist
-curl -sSL https://guardian-switch.vercel.app/sentinel.py -o "$SENTINEL_DIR/sentinel.py"
+# Download sentinel script
+curl -sSL ${baseUrl}/sentinel.py -o "$SENTINEL_DIR/sentinel.py"
 
 # Setup Systemd Timer
 mkdir -p "$HOME/.config/systemd/user/"
@@ -63,6 +65,10 @@ EOF
 # Reload and enable
 systemctl --user daemon-reload
 systemctl --user enable --now guardian-sentinel.timer
+
+# Run immediately for first pulse
+echo "🚀 Sending initial heartbeat..."
+/usr/bin/python3 "$SENTINEL_DIR/sentinel.py"
 
 echo "✅ GuardianSwitch Sentinel installed and active."
 `;
